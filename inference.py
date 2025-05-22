@@ -50,7 +50,7 @@ def inference_single(root, pc_file, aug_mode = "no_agu"):
         pc_file = pc_file.replace('/pc', '/pc_scale')
         os.makedirs(os.path.dirname(pc_file), exist_ok=True)    
         # add random scale
-        scale = np.random.uniform(0.5, 2.0)
+        scale = np.random.uniform(0.5, 2.0)*0.5
         pc *= scale 
         np.save(pc_file, pc)
     elif aug_mode == "sim3":

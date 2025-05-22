@@ -13,7 +13,7 @@ You can run the demo in one of two ways:
 
 [<img src="https://colab.research.google.com/assets/colab-badge.svg" height="32"/>](https://colab.research.google.com/github/submission13448/simeco/blob/main/demo.ipynb)
 
-To run the demo on Google Colab, simply click the badge above ([anonymous link](https://colab.research.google.com/github/submission13448/simeco/blob/main/demo.ipynb)). Follow the instructions and execute the cells sequentially. Please note that setting up the environment and installing dependencies will take about 1-2 minutes.
+To run the demo on Google Colab, simply click the badge above ([anonymous link](https://colab.research.google.com/github/submission13448/simeco/blob/main/demo.ipynb)). Follow the instructions and execute the cells sequentially with a GPU instance. Please note that setting up the environment and installing dependencies will take about 1-2 minutes.
 
 ### Local Linux 🖥️
 
@@ -115,7 +115,7 @@ bash ./scripts/dist_train.sh <NUM_GPU> <port> \
     --config <config> \
     --exp_name <name> \
     [--resume] \
-    [--start_ckpts <path>] \
+    [--start_ckpts <path>]
 ```
 
 Example:
@@ -131,7 +131,7 @@ bash ./scripts/train.sh <GPUIDS> \
     --config <config> \
     --exp_name <name> \
     [--resume] \
-    [--start_ckpts <path>] \
+    [--start_ckpts <path>]
 ```
 
 Example:
