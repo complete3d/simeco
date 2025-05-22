@@ -1,0 +1,24 @@
+name: simeco
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pytorch=1.12.1
+  - torchvision=0.13.1
+  - torchaudio=0.12.1
+  - cudatoolkit=11.3
+  - cudatoolkit-dev
+  - mkl=2024.0.0 
+  - pip
+  - pip:
+      - numpy == 1.19.5
+      - "git+https://github.com/erikwijmans/Pointnet2_PyTorch.git#egg=pointnet2_ops&subdirectory=pointnet2_ops_lib"
+      - "https://github.com/unlimblue/KNN_CUDA/releases/download/0.2/KNN_CUDA-0.2-py3-none-any.whl"
+      - argparse
+      - easydict
+      - pyyaml
+      - safetensors==0.4.5
+      - timm==0.4.5
+      - einops
