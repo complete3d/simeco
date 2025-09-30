@@ -1,4 +1,12 @@
-# SIMECO
+# SIMECO: SIM(3)-Equivariant Shape Completion
+
+**NeurIPS 2025**
+
+[![Website](https://img.shields.io/badge/%F0%9F%A4%8D%20Project%20-Website-blue)](https://sime-completion.github.io)
+[![arXiv](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/abs/)
+[![Hugging Face Model](https://img.shields.io/badge/🤗%20Hugging%20Face%20-Model-yellow)](https://huggingface.co/)
+[![Colab Demo](https://img.shields.io/badge/Colab-Demo-FF6F00?logo=googlecolab&logoColor=yellow)](https://colab.research.google.com/github/complete3d/simeco/blob/main/demo/demo.ipynb)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://raw.githubusercontent.com/complete3d/simeco/main/LICENSE)
 
 This repository provides the demo and code of SIMECO.
 
@@ -11,9 +19,9 @@ You can run the demo in one of two ways:
 
 ### Google Colab ☁️
 
-[<img src="https://colab.research.google.com/assets/colab-badge.svg" height="32"/>](https://colab.research.google.com/github/submission13448/simeco/blob/main/demo.ipynb)
+[<img src="https://colab.research.google.com/assets/colab-badge.svg" height="32"/>](https://colab.research.google.com/github/complete3d/simeco/blob/main/demo.ipynb)
 
-To run the demo on Google Colab, simply click the badge above ([anonymous link](https://colab.research.google.com/github/submission13448/simeco/blob/main/demo.ipynb)). Follow the instructions and execute the cells sequentially with a GPU instance. Please note that setting up the environment and installing dependencies will take about 1-2 minutes.
+To run the demo on Google Colab, simply click the badge above. Follow the instructions and execute the cells sequentially with a GPU instance. Please note that setting up the environment and installing dependencies will take about 1-2 minutes.
 
 ### Local Linux 🖥️
 
