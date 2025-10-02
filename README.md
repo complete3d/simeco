@@ -3,12 +3,16 @@
 **NeurIPS 2025**
 
 [![Website](https://img.shields.io/badge/%F0%9F%A4%8D%20Project%20-Website-blue)](https://sime-completion.github.io)
-[![arXiv](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/abs/)
+[![arXiv](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/abs/2509.26631)
 [![Hugging Face Model](https://img.shields.io/badge/🤗%20Hugging%20Face%20-Model-yellow)](https://huggingface.co/)
 [![Colab Demo](https://img.shields.io/badge/Colab-Demo-FF6F00?logo=googlecolab&logoColor=yellow)](https://colab.research.google.com/github/complete3d/simeco/blob/main/demo/demo.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://raw.githubusercontent.com/complete3d/simeco/main/LICENSE)
 
-This repository provides the demo and code of SIMECO.
+3D shape completion methods typically assume scans are pre-aligned to a canonical frame. When such alignment is absent in real data, performance collapses. SIMECO is a SIM(3)-equivariant network that delivers generalizable shape completion.
+
+<p align="center">
+  <img src="assets/teaser.png" alt="teaser" width="650px">
+</p>
 
 ## Getting Started with the Demo 🤹‍♂️
 
@@ -148,3 +152,23 @@ bash ./scripts/train.sh 0 \
     --config cfgs/SIMECO.yaml \
     --exp_name SIMECO 
 ```
+
+## 🎓 Citation
+
+If you use SIMECO in a scientific work, please consider citing the paper:
+
+<a href="https://arxiv.org/pdf/2509.26631"><img class="image" align="left" width="190px" src="./assets/paper_thumbnail.png"></a>
+<a href="https://arxiv.org/pdf/2509.26631">[paper]</a>&nbsp;&nbsp;<a href="https://arxiv.org/abs/2509.26631">[arxiv]</a>&nbsp;&nbsp;<a href="./CITATION.bib">[bibtex]</a><br>
+```bibtex
+@article{wang2025simeco,
+    title={Learning Generalizable Shape Completion with SIM(3) Equivariance}, 
+    author={Yuqing Wang and Zhaiyu Chen and Liangliang Nan and Xiao Xiang Zhu},
+    journal={arXiv preprint arXiv:2509.26631},
+    year={2025}
+}
+```
+<br clear="left"/>
+
+## 🙏 Acknowledgements
+
+Part of our implementation is based on the [PoinTr](https://github.com/yuxumin/PoinTr) repository. We thank the authors for open-sourcing their great work.
