@@ -53,6 +53,9 @@ A CUDA-enabled GPU is required for local inference.
 
 ## Full Runs 🏃
 
+> [!IMPORTANT]  
+> We're actively refactoring the codebase through December 2025. Expect occasional breaking changes.
+
 If you have sufficient resources and want to train and evaluate SIMECO end-to-end, follow these steps:
 
 ### Extra Dependencies ⚙️
@@ -162,7 +165,7 @@ If you use SIMECO in a scientific work, please consider citing the paper:
 ```bibtex
 @article{wang2025simeco,
     title={Learning Generalizable Shape Completion with SIM(3) Equivariance}, 
-    author={Yuqing Wang and Zhaiyu Chen and Liangliang Nan and Xiao Xiang Zhu},
+    author={Yuqing Wang and Zhaiyu Chen and Xiao Xiang Zhu},
     journal={arXiv preprint arXiv:2509.26631},
     year={2025}
 }
