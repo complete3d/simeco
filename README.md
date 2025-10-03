@@ -11,7 +11,7 @@
 3D shape completion methods typically assume scans are pre-aligned to a canonical frame. When such alignment is absent in real data, performance collapses. SIMECO is a SIM(3)-equivariant network that delivers generalizable shape completion.
 
 <p align="center">
-  <img src="assets/teaser.png" alt="teaser" width="650px">
+  <img src="assets/video.gif" alt="teaser" width="650px">
 </p>
 
 ## Getting Started with the Demo 🤹‍♂️
