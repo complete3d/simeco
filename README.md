@@ -35,13 +35,13 @@ A CUDA-enabled GPU is required for local inference.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/submission13448/simeco.git && cd simeco && git lfs pull
+   git clone https://github.com/complete3d/simeco.git && cd simeco && git lfs pull
    ```
 
 2. Create a conda environment with all dependencies (this will take approximately 5 minutes):
 
    ```bash
-   conda env create -f build/environment.yml && conda activate simeco
+   . install.sh
    ```
 
 3. Run the inference code and choose the desired transformation mode (e.g., `sim3`, `translation`, `scale` or `rotation`). The results will be saved in the `data/result` directory.
@@ -51,25 +51,46 @@ A CUDA-enabled GPU is required for local inference.
    ```
 ---
 
-## Full Runs 🏃
+## 🚀 Usage:
 
-> [!IMPORTANT]  
-> We're actively refactoring the codebase through December 2025. Expect occasional breaking changes.
+### Training 🏋️‍♀️
 
-If you have sufficient resources and want to train and evaluate SIMECO end-to-end, follow these steps:
+* Start training using one of the two parallelization:
 
-### Extra Dependencies ⚙️
+   **Distributed Data Parallel (DDP):**
+  
+    ```bash
+    # Replace device IDs with your own
+    CUDA_VISIBLE_DEVICES=0,1 ./scripts/train_ddp.sh
+    ```
 
-Install the dependencies:
+   **Data Parallel (DP):**
+  
+    ```bash
+    # Replace device IDs with your own
+    CUDA_VISIBLE_DEVICES=0,1 ./scripts/train_dp.sh
+    ```
 
-   ```bash
-   cd extensions/chamfer_dist
-   python setup.py install
-   ```
+* Monitor training progress using TensorBoard:
+  
+  ```bash
+  # Replace ${exp_name} with your experiment name (e.g., default)
+  # Board typically available at http://localhost:6006
+  tensorboard --logdir './output/${exp_name}/tensorboard'
+  ```
+
+### Evaluation 📊
+
+* To evaluate a [pre-trained SIMECO model](./ckpt) using a single GPU:
+
+```bash
+# Replace device IDs with your own
+CUDA_VISIBLE_DEVICES=0 ./scripts/test.sh
+```
 
 ### Dataset 📂
 
-We use the official PCN dataset. The directory structure should be:
+We use the official PCN dataset. Please download the dataset from [PCN](https://gateway.infinitescript.com/s/ShapeNetCompletion) and place it under the `data/` directory. The expected directory structure is:
 ```
 │PCN/
 ├──train/
@@ -101,60 +122,10 @@ We use the official PCN dataset. The directory structure should be:
 └──category.txt
 ```
 
-### Evaluation 📊
+## 🚧 TODOs
 
-To evaluate a [pre-trained SIMECO model](./ckpt) using a single GPU:
-
-```bash
-bash ./scripts/test.sh <GPU_IDS> \
-    --ckpts <path_to_checkpoint> \
-    --config <path_to_config.yaml> \
-    --exp_name <experiment_name>
-```
-
-Example:
-```bash
-bash ./scripts/test.sh 0 \
-    --ckpts ckpt/checkpoint.pth \
-    --config cfgs/SIMECO.yaml \
-    --exp_name SIMECO
-```
-
-### Training 🏋️‍♀️
-
-To train SIMECO from scratch, run with DDP or DP:
-
-**DistributedDataParallel (DDP)** 
-```bash
-bash ./scripts/dist_train.sh <NUM_GPU> <port> \
-    --config <config> \
-    --exp_name <name> \
-    [--resume] \
-    [--start_ckpts <path>]
-```
-
-Example:
-```bash
-bash ./scripts/dist_train.sh 2 12345 \
-    --config cfgs/SIMECO.yaml \
-    --exp_name SIMECO 
-```
-
-**DataParallel (DP)** 
-```bash
-bash ./scripts/train.sh <GPUIDS> \
-    --config <config> \
-    --exp_name <name> \
-    [--resume] \
-    [--start_ckpts <path>]
-```
-
-Example:
-```bash
-bash ./scripts/train.sh 0 \
-    --config cfgs/SIMECO.yaml \
-    --exp_name SIMECO 
-```
+- [ ] Code refactoring and cleanup
+- [ ] Hugging Face space
 
 ## 🎓 Citation
 

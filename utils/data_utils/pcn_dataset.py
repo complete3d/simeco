@@ -196,7 +196,6 @@ class PCN(data.Dataset):
             
             if self.mode == 'sim3' and self.subset == 'test':
                 pc_centroid = np.mean(data['partial'], axis=0)
-                pc_scale = 1/np.max(np.linalg.norm(data['partial'] - pc_centroid, axis=1))
                 data['centroid'] = -torch.tensor(pc_centroid).float()
             else:
                 data['centroid'] = torch.zeros(3).float()
