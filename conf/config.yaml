@@ -25,7 +25,7 @@ val_freq: 1
 resume_last: false
 resume_from: null
 debug: false
-test_only: true
+test_only: false
 
 # paths
 log_name: ${model.name}
@@ -57,7 +57,7 @@ bnmscheduler:
     lowest_decay: 0.01
 
 # training settings
-total_bs : 4
+total_bs : 40
 step_per_update : 1
 max_epoch : 200
 
@@ -67,7 +67,7 @@ consider_metric: CDL1
 # evaluation settings
 evaluate:
   aug_mode: no_augment
-  single_file_path: demo/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy
+  single_file_path: demo/demo_data/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy
   checkpoint_path: ckpt/ckpt-best.pth
 
 # hydra settings
