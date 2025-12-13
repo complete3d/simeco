@@ -83,10 +83,10 @@ A CUDA-enabled GPU is required for local inference.
 
 * To evaluate a [pre-trained SIMECO model](./ckpt) using a single GPU:
 
-```bash
-# Replace device IDs with your own
-CUDA_VISIBLE_DEVICES=0 ./scripts/test.sh
-```
+  ```bash
+  # Replace device IDs with your own
+  CUDA_VISIBLE_DEVICES=0 ./scripts/test.sh
+  ```
 
 ### Dataset 📂
 
@@ -124,8 +124,9 @@ We use the official PCN dataset. Please download the dataset from [PCN](https://
 
 ## 🚧 TODOs
 
-- [ ] Code refactoring and cleanup
-- [ ] Hugging Face space
+- [x] Code release
+- [ ] Debiased protocol
+- [ ] HF release
 
 ## 🎓 Citation
 
