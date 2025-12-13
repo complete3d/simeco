@@ -1,67 +1,75 @@
-from tools import run_net, test_net
-from utils import parser, dist_utils, misc
-from utils.logger import *
-from utils.config import *
-import time
 import os
+
 import torch
 from tensorboardX import SummaryWriter
+import hydra
+from omegaconf import DictConfig
 
-def main():
-    # args
-    args = parser.get_args()
-    # CUDA
-    args.use_gpu = torch.cuda.is_available()
-    if args.use_gpu:
+from utils import dist_utils, misc
+from utils.runner import run_trainer, run_tester
+from utils.logger import get_root_logger
+from utils.config import create_experiment_dir
+
+
+@hydra.main(config_path="conf", config_name="config", version_base="1.2")
+def main(cfg: DictConfig):
+    """Main function to initialize and run the training and testing process."""
+
+    # Check if CUDA is available and enable cuDNN benchmark for performance
+    if cfg.use_gpu and torch.cuda.is_available():
         torch.backends.cudnn.benchmark = True
-    # init distributed env first, since logger depends on the dist info.
-    if args.launcher == 'none':
-        args.distributed = False
-    else:
-        args.distributed = True
-        dist_utils.init_dist(args.launcher)
-        # re-set gpu_ids with distributed training mode
-        _, world_size = dist_utils.get_dist_info()
-        args.world_size = world_size
-    # logger
-    timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
-    log_file = os.path.join(args.experiment_path, f'{timestamp}.log')
-    logger = get_root_logger(log_file=log_file, name=args.log_name)
-    # define the tensorboard writer
-    if not args.test:
-        if args.local_rank == 0:
-            train_writer = SummaryWriter(os.path.join(args.tfboard_path, 'train'))
-            val_writer = SummaryWriter(os.path.join(args.tfboard_path, 'test'))
-        else:
-            train_writer = None
-            val_writer = None
-        
-    # config
-    config = get_config(args, logger = logger)
-    # batch size
-    if args.distributed:
-        assert config.total_bs % world_size == 0
-        config.dataset.train.others.bs = config.total_bs // world_size
-    else:
-        config.dataset.train.others.bs = config.total_bs
-    # log 
-    log_args_to_file(args, 'args', logger = logger)
-    log_config_to_file(config, 'config', logger = logger)
-    # exit()
-    logger.info(f'Distributed training: {args.distributed}')
-    # set random seeds
-    if args.seed is not None:
-        logger.info(f'Set random seed to {args.seed}, '
-                    f'deterministic: {args.deterministic}')
-        misc.set_random_seed(args.seed + args.local_rank, deterministic=args.deterministic) # seed + rank, for augmentation
-    if args.distributed:
-        assert args.local_rank == torch.distributed.get_rank() 
 
+        # Initialize distributed training if applicable
+        if cfg.distributed:
+            dist_utils.init_dist(cfg.launcher)
 
-    if args.test:
-        test_net(args, config)
+            # Re-set GPU IDs when using distributed training
+            _, world_size = dist_utils.get_dist_info()
+            cfg.world_size = world_size
+    
+    # Retrieve local rank
+    local_rank = int(os.environ["LOCAL_RANK"])
+    
+    create_experiment_dir(cfg)
+
+    # Set up logger
+    logger = get_root_logger(name=cfg.log_name)
+
+    # Initialize TensorBoard writers for training and validation
+    # Only the main process (local_rank == 0) writes to TensorBoard
+    if local_rank == 0:
+        train_writer = SummaryWriter(os.path.join(cfg.output_dir, 'tensorboard/train'))
+        val_writer = SummaryWriter(os.path.join(cfg.output_dir, 'tensorboard/test'))
     else:
-        run_net(args, config, train_writer, val_writer)
+        train_writer = None
+        val_writer = None
+
+    # Adjust batch size based on the distributed training setting
+    if cfg.distributed:
+        assert cfg.total_bs % world_size == 0, "Total batch size must be divisible by world size."
+        cfg.dataset.bs = cfg.total_bs // world_size
+    else:
+        cfg.dataset.bs = cfg.total_bs
+
+    # Log distributed training status
+    if local_rank == 0:
+        logger.info(f'Distributed training: {cfg.distributed}')
+
+    # Set random seed for reproducibility if provided
+    if cfg.seed is not None:
+        if local_rank == 0:
+            logger.info(f'Set random seed to {cfg.seed}, deterministic: {cfg.deterministic}')
+        misc.set_random_seed(cfg.seed + local_rank, deterministic=cfg.deterministic)
+
+    # In distributed mode, confirm local rank matches the distributed rank
+    if cfg.distributed:
+        assert local_rank == torch.distributed.get_rank(), "Local rank does not match distributed rank."
+
+    # Run trainer
+    if cfg.test_only:
+        run_tester(cfg)
+    else:
+        run_trainer(cfg, train_writer, val_writer)
 
 
 if __name__ == '__main__':
