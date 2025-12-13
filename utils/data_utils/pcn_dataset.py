@@ -157,10 +157,10 @@ class PCN(data.Dataset):
                     'taxonomy_id': dc['taxonomy_id'],
                     'model_id': s,
                     'partial_path': [
-                        self.partial_points_path % (subset, dc['taxonomy_id'], s, i)
+                        os.path.join( self.partial_points_path, dc['taxonomy_id'], s, f'{i:02d}.pcd')
                         for i in range(n_renderings)
                     ],
-                    'gt_path': self.complete_points_path % (subset, dc['taxonomy_id'], s),
+                    'gt_path': os.path.join(self.complete_points_path, dc['taxonomy_id'], s + '.pcd'),
                 })
 
         print_log(

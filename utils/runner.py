@@ -2,6 +2,7 @@ import copy
 import json
 import time
 import os
+from omegaconf import OmegaConf
 
 import torch
 import torch.nn as nn
@@ -28,12 +29,9 @@ def run_trainer(cfg, train_writer=None, val_writer=None):
     """
     logger = get_logger(cfg.log_name)
     local_rank = int(os.environ["LOCAL_RANK"])
-    
     # Build datasets for training and testing
-    train_config = copy.deepcopy(cfg.dataset)
-    train_config.subset = "train"
-    test_config = copy.deepcopy(cfg.dataset)
-    test_config.subset = "test"
+    train_config = OmegaConf.merge(cfg.dataset, {"subset": "train"})
+    test_config  = OmegaConf.merge(cfg.dataset, {"subset": "test"})
     (train_sampler, train_dataloader), (_, test_dataloader) = builder.dataset_builder(cfg, train_config, logger=logger), \
         builder.dataset_builder(cfg, test_config, logger=logger)
         
