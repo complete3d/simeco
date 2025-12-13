@@ -1,0 +1,14 @@
+name: ???
+root: ???
+data_path: data/${dataset.root}
+num_points: 16384
+num_renderings: 8    
+
+category_file_path: data/${dataset.root}/${dataset.name}.json
+partial_points_path: data/${dataset.root}/%s/partial/%s/%s/%02d.pcd
+complete_points_path: data/${dataset.root}/%s/complete/%s/%s.pcd
+bs: ???
+subset: ???
+cars: false  
+mode: sim3
+random_object_scale: false
