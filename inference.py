@@ -17,7 +17,7 @@ def cfg_from_yaml_file(cfg_file):
 def inference_single(root, pc_file, aug_mode = "no_agu"):
     # Initialize the PaCo model with the config      
     config = cfg_from_yaml_file(root + "/cfgs/SIMECO.yaml")
-    checkpoint = torch.load(root + "/ckpt/checkpoint.pth")
+    checkpoint = torch.load(root + "/ckpt/ckpt-best.pth")
     base_model = SIMECO(config.model)
    
     base_model.load_state_dict(checkpoint)

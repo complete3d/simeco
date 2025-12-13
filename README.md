@@ -23,7 +23,7 @@ You can run the demo in one of two ways:
 
 ### Google Colab ☁️
 
-[<img src="https://colab.research.google.com/assets/colab-badge.svg" height="32"/>](https://colab.research.google.com/github/complete3d/simeco/blob/main/demo.ipynb)
+[<img src="https://colab.research.google.com/assets/colab-badge.svg" height="32"/>](https://colab.research.google.com/github/complete3d/simeco/blob/main/demo/demo.ipynb)
 
 To run the demo on Google Colab, simply click the badge above. Follow the instructions and execute the cells sequentially with a GPU instance. Please note that setting up the environment and installing dependencies will take about 1-2 minutes.
 
