@@ -1,7 +1,11 @@
 import inspect
 import warnings
 from functools import partial
-from utils import config
+
+from omegaconf import DictConfig
+
+from . import config
+
 
 class Registry:
     """A registry to map strings to classes.
@@ -11,7 +15,7 @@ class Registry:
         >>> @MODELS.register_module()
         >>> class ResNet:
         >>>     pass
-        >>> resnet = MODELS.build(dict(NAME='ResNet'))
+        >>> resnet = MODELS.build(dict(name='ResNet'))
     Please refer to https://mmcv.readthedocs.io/en/latest/registry.html for
     advanced useage.
     Args:
@@ -156,7 +160,7 @@ class Registry:
             >>> @mmdet_models.register_module()
             >>> class ResNet:
             >>>     pass
-            >>> resnet = models.build(dict(NAME='mmdet.ResNet'))
+            >>> resnet = models.build(dict(name='mmdet.ResNet'))
         """
 
         assert isinstance(registry, Registry)
@@ -246,30 +250,30 @@ class Registry:
 def build_from_cfg(cfg, registry, default_args=None):
     """Build a module from config dict.
     Args:
-        cfg (edict): Config dict. It should at least contain the key "NAME".
+        cfg (edict): Config dict. It should at least contain the key "name".
         registry (:obj:`Registry`): The registry to search the type from.
     Returns:
         object: The constructed object.
     """
-    if not isinstance(cfg, dict):
+    if not (isinstance(cfg, dict) or isinstance(cfg, DictConfig)):
         raise TypeError(f'cfg must be a dict, but got {type(cfg)}')
-    if 'NAME' not in cfg:
-        if default_args is None or 'NAME' not in default_args:
+    if 'name' not in cfg:
+        if default_args is None or 'name' not in default_args:
             raise KeyError(
-                '`cfg` or `default_args` must contain the key "NAME", '
+                '`cfg` or `default_args` must contain the key "name", '
                 f'but got {cfg}\n{default_args}')
     if not isinstance(registry, Registry):
         raise TypeError('registry must be an mmcv.Registry object, '
                         f'but got {type(registry)}')
 
-    if not (isinstance(default_args, dict) or default_args is None):
+    if not (isinstance(default_args, dict) or isinstance(cfg, DictConfig) or default_args is None):
         raise TypeError('default_args must be a dict or None, '
                         f'but got {type(default_args)}')
 
     if default_args is not None:
         cfg = config.merge_new_config(cfg, default_args)
 
-    obj_type = cfg.get('NAME')
+    obj_type = cfg.get('name')
 
     if isinstance(obj_type, str):
         obj_cls = registry.get(obj_type)
