@@ -133,6 +133,6 @@ dmypy.json
 .idea/
 
 # Custome
-data/
+data/PCN
 output/
 archive/
