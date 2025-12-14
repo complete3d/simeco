@@ -61,3 +61,11 @@ def save_experiment_config(args, config, logger = None):
     config_path = os.path.join(args.experiment_path, 'config.yaml')
     os.system('cp %s %s' % (args.config, config_path))
     print_log(f'Copy the Config file from {args.config} to {config_path}',logger = logger )
+    
+def create_experiment_dir(args):
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir, exist_ok=True)
+        print('Create output_dir successfully at %s' % args.output_dir)
+    if not os.path.exists(args.tensorboard_dir):
+        os.makedirs(args.tensorboard_dir, exist_ok=True)
+        print('Create tensorboard_dir successfully at %s' % args.tensorboard_dir)

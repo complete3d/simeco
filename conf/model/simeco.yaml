@@ -1,0 +1,34 @@
+name: SIMECO
+num_query: 512 
+num_points: 16384
+center_num: [512, 256]
+global_feature_dim: 1024
+bias_epsilon: 0.000001
+
+encoder_type: vecgraph
+decoder_type: fc
+query_selection: true
+
+encoder_config:
+  embed_dim: 384
+  depth: 6
+  num_heads: 6
+  k: 8
+  mlp_ratio: 2.
+  block_style_list: ['vnattn-vngraph', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn']
+  combine_style: 'concat'
+  bias_epsilon: 0.000001
+  scale_factor: 1.0
+
+decoder_config:
+  embed_dim: 384
+  depth: 8
+  num_heads: 6
+  k: 8
+  mlp_ratio: 2.
+  self_attn_block_style_list: ['vnattn-vngraph', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn']
+  self_attn_combine_style: 'concat'
+  cross_attn_block_style_list: ['vnattn-vngraph', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn', 'vnattn']
+  cross_attn_combine_style: 'concat'
+  bias_epsilon: 0.000001
+  scale_factor: 1.0

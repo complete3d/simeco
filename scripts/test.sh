@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
-set -x
-GPUS=$1
-PY_ARGS=${@:2}
+if [ "$DEBUG" = "1" ]; then
+  set -x
+fi
 
-CUDA_VISIBLE_DEVICES=${GPUS} python main.py --test ${PY_ARGS}
+export LOCAL_RANK=0
+
+python main.py "$@"
+
+# Usage:
+# CUDA_VISIBLE_DEVICES=0 ./scripts/test.sh

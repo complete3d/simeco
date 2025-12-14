@@ -1,0 +1,77 @@
+# Default configuration for the Project.
+# Values shall be overridden by respective dataset configurations.
+
+# default settings
+defaults:
+  - _self_
+  - dataset: pcn
+  - model: simeco
+  - override hydra/job_logging: custom
+  - override hydra/hydra_logging: colorlog
+
+# general settings
+use_gpu: true
+distributed: false
+world_size: ???
+launcher: pytorch
+num_workers: 4
+seed: 0
+deterministic: false
+sync_bn: false
+
+# experiment settings
+exp_name: default
+val_freq: 1
+resume_last: false
+resume_from: null
+debug: false
+test_only: false
+
+# paths
+log_name: ${model.name}
+output_dir: ./output/${exp_name}
+tensorboard_dir: ${output_dir}/tensorboard/
+
+# optimizer settings
+optimizer: 
+  type: AdamW
+  kwargs:
+    lr : 0.0001
+    weight_decay : 0.0005
+
+# scheduler settings
+scheduler:
+  type: LambdaLR
+  kwargs:
+    decay_step: 15
+    lr_decay: 0.9
+    lowest_decay: 0.002 # min lr = lowest_decay * lr
+
+# batch norm scheduler
+bnmscheduler:
+  type: Lambda
+  kwargs:
+    decay_step: 21
+    bn_decay: 0.5
+    bn_momentum: 0.9
+    lowest_decay: 0.01
+
+# training settings
+total_bs : 40
+step_per_update : 1
+max_epoch : 200
+
+# loss settings
+consider_metric: CDL1
+
+# evaluation settings
+evaluate:
+  aug_mode: no_augment
+  single_file_path: demo/demo_data/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy
+  checkpoint_path: ckpt/ckpt-best.pth
+
+# hydra settings
+hydra:
+  run:
+    dir: ${output_dir}
+  verbose: false

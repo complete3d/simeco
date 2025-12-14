@@ -1,8 +1,8 @@
 import os
+
 import torch
 import torch.multiprocessing as mp
 from torch import distributed as dist
-
 
 
 def init_dist(launcher, backend='nccl', **kwargs):
@@ -15,11 +15,11 @@ def init_dist(launcher, backend='nccl', **kwargs):
 
 
 def _init_dist_pytorch(backend, **kwargs):
-    rank = int(os.environ['RANK'])
+    rank = int(os.environ['LOCAL_RANK'])
     num_gpus = torch.cuda.device_count()
-    torch.cuda.set_device(rank % num_gpus)
+    torch.cuda.set_device(rank)
     dist.init_process_group(backend=backend, **kwargs)
-    print(f'init distributed in rank {torch.distributed.get_rank()}')
+    print(f'Init distributed in rank {torch.distributed.get_rank()}')
 
 
 def get_dist_info():
@@ -37,13 +37,14 @@ def get_dist_info():
 
 
 def reduce_tensor(tensor, args):
-    '''
+    """
         for acc kind, get the mean in each gpu
-    '''
+    """
     rt = tensor.clone()
     torch.distributed.all_reduce(rt, op=torch.distributed.ReduceOp.SUM)
     rt /= args.world_size
     return rt
+
 
 def gather_tensor(tensor, args):
     output_tensors = [tensor.clone() for _ in range(args.world_size)]

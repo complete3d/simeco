@@ -1,43 +1,95 @@
-import os, sys
+import os
 
 import torch
-# optimizer
 import torch.optim as optim
 from timm.scheduler import CosineLRScheduler
-# dataloader
-from datasets import build_dataset_from_cfg
-from models import build_model_from_cfg
-# utils
-from utils.logger import *
-from utils.misc import *
 
-def dataset_builder(args, config):
-    dataset = build_dataset_from_cfg(config._base_, config.others)
-    shuffle = config.others.subset == 'train'
+from .data_utils import build_dataset_from_cfg
+from .logger import print_log
+from .misc import *
+
+
+def build_model_from_cfg(cfg, **kwargs):
+    """
+    Build a dataset, defined by `dataset_name`.
+    Args:
+        cfg: Model configuration
+    Returns:
+        Dataset: a constructed dataset specified by dataset_name.
+    """
+    from simeco import MODELS
+
+    return MODELS.build(cfg, **kwargs)
+
+
+def dataset_builder(args, config, logger = None):
+    """Build dataset and dataloader from configuration.
+    
+    Args:
+        args: Command line arguments containing distributed training info
+        config: Dataset configuration with parameters like batch size
+        
+    Returns:
+        tuple: (sampler, dataloader) for the specified dataset
+    """
+    dataset = build_dataset_from_cfg(config)
+    shuffle = config.subset == 'train'
     if args.distributed:
         sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle = shuffle)
-        dataloader = torch.utils.data.DataLoader(dataset, batch_size = config.others.bs if shuffle else 1,
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size = config.bs if shuffle else 1,
                                             num_workers = int(args.num_workers),
-                                            drop_last = config.others.subset == 'train',
+                                            drop_last = config.subset == 'train',
                                             worker_init_fn = worker_init_fn,
                                             sampler = sampler)
     else:
         sampler = None
-        dataloader = torch.utils.data.DataLoader(dataset, batch_size=config.others.bs if shuffle else 1,
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=config.bs if shuffle else 1,
                                                 shuffle = shuffle, 
-                                                drop_last = config.others.subset == 'train',
+                                                drop_last = config.subset == 'train',
                                                 num_workers = int(args.num_workers),
                                                 worker_init_fn=worker_init_fn)
+    if logger is not None:
+        print_log(f'[DATASET] {config.subset} set with {len(dataset)} samples, batch size: {config.bs}, shuffle: {shuffle}', logger=logger)
     return sampler, dataloader
 
+
 def model_builder(config):
+    """Build model from configuration.
+    
+    Args:
+        config: Model configuration
+        
+    Returns:
+        nn.Module: Instantiated model
+    """
     model = build_model_from_cfg(config)
     return model
 
 def build_optimizer(base_model, config):
+    """Build optimizer for the model based on configuration.
+    
+    Args:
+        base_model: Model to optimize
+        config: Optimizer configuration
+        
+    Returns:
+        torch.optim.Optimizer: Configured optimizer
+    """
     opti_config = config.optimizer
     if opti_config.type == 'AdamW':
         def add_weight_decay(model, weight_decay=1e-5, skip_list=()):
+            """Add weight decay to specific parameters.
+            
+            Excludes bias and 1D parameters from weight decay.
+            
+            Args:
+                model: Model to apply weight decay
+                weight_decay: Weight decay factor
+                skip_list: List of parameter names to skip
+                
+            Returns:
+                list: Parameter groups with appropriate weight decay settings
+            """
             decay = []
             no_decay = []
             for name, param in model.module.named_parameters():
@@ -62,6 +114,17 @@ def build_optimizer(base_model, config):
     return optimizer
 
 def build_scheduler(base_model, optimizer, config, last_epoch=-1):
+    """Build learning rate scheduler based on configuration.
+    
+    Args:
+        base_model: Model being trained
+        optimizer: Optimizer to schedule
+        config: Scheduler configuration
+        last_epoch: Last epoch number for resuming training
+        
+    Returns:
+        object: Learning rate scheduler or list of schedulers
+    """
     sche_config = config.scheduler
     if sche_config.type == 'LambdaLR':
         scheduler = build_lambda_sche(optimizer, sche_config.kwargs, last_epoch=last_epoch)  # misc.py
@@ -79,6 +142,7 @@ def build_scheduler(base_model, optimizer, config, last_epoch=-1):
     else:
         raise NotImplementedError()
     
+    # Add batch norm momentum scheduler if specified
     if config.get('bnmscheduler') is not None:
         bnsche_config = config.bnmscheduler
         if bnsche_config.type == 'Lambda':
@@ -88,6 +152,16 @@ def build_scheduler(base_model, optimizer, config, last_epoch=-1):
     return scheduler
 
 def resume_model(base_model, args, logger = None):
+    """Resume model from checkpoint.
+    
+    Args:
+        base_model: Model to load weights into
+        args: Arguments containing experiment path
+        logger: Optional logger for printing information
+        
+    Returns:
+        tuple: (start_epoch, best_metrics) from the checkpoint
+    """
     ckpt_path = os.path.join(args.experiment_path, 'ckpt-last.pth')
     if not os.path.exists(ckpt_path):
         print_log(f'[RESUME INFO] no checkpoint file from path {ckpt_path}...', logger = logger)
@@ -97,8 +171,7 @@ def resume_model(base_model, args, logger = None):
     # load state dict
     map_location = {'cuda:%d' % 0: 'cuda:%d' % args.local_rank}
     state_dict = torch.load(ckpt_path, map_location=map_location)
-    # parameter resume of base model
-    # if args.local_rank == 0:
+    # Load base model parameters
     base_ckpt = {k.replace("module.", ""): v for k, v in state_dict['base_model'].items()}
     base_model.load_state_dict(base_ckpt)
 
@@ -107,12 +180,21 @@ def resume_model(base_model, args, logger = None):
     best_metrics = state_dict['best_metrics']
     if not isinstance(best_metrics, dict):
         best_metrics = best_metrics.state_dict()
-    # print(best_metrics)
 
     print_log(f'[RESUME INFO] resume ckpts @ {start_epoch - 1} epoch( best_metrics = {str(best_metrics):s})', logger = logger)
     return start_epoch, best_metrics
 
 def resume_optimizer(optimizer, args, logger = None):
+    """Resume optimizer state from checkpoint.
+    
+    Args:
+        optimizer: Optimizer to restore state
+        args: Arguments containing experiment path
+        logger: Optional logger for printing information
+        
+    Returns:
+        int: Status code (0 on success)
+    """
     ckpt_path = os.path.join(args.experiment_path, 'ckpt-last.pth')
     if not os.path.exists(ckpt_path):
         print_log(f'[RESUME INFO] no checkpoint file from path {ckpt_path}...', logger = logger)
@@ -124,24 +206,47 @@ def resume_optimizer(optimizer, args, logger = None):
     optimizer.load_state_dict(state_dict['optimizer'])
 
 def save_checkpoint(base_model, optimizer, epoch, metrics, best_metrics, prefix, args, logger = None):
-    if args.local_rank == 0:
+    """Save model checkpoint.
+    
+    Args:
+        base_model: Model to save
+        optimizer: Optimizer state to save
+        epoch: Current epoch number
+        metrics: Current performance metrics
+        best_metrics: Best performance metrics so far
+        prefix: Checkpoint filename prefix
+        args: Arguments containing output_dir
+        logger: Optional logger for printing information
+    """
+    if int(os.environ["LOCAL_RANK"]) == 0:
         torch.save({
-                    'base_model' : base_model.module.state_dict() if args.distributed else base_model.state_dict(),
-                    'optimizer' : optimizer.state_dict(),
-                    'epoch' : epoch,
-                    'metrics' : metrics.state_dict() if metrics is not None else dict(),
-                    'best_metrics' : best_metrics.state_dict() if best_metrics is not None else dict(),
-                    }, os.path.join(args.experiment_path, prefix + '.pth'))
-        print_log(f"Save checkpoint at {os.path.join(args.experiment_path, prefix + '.pth')}", logger = logger)
+            'base_model': base_model.module.state_dict() if args.distributed else base_model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'epoch': epoch,
+            'metrics': metrics if metrics is not None else dict(),
+            'best_metrics': best_metrics if best_metrics is not None else dict(),
+        }, os.path.join(args.output_dir, prefix + '.pth'))
+        print_log(f"Save checkpoint at {os.path.join(args.output_dir, prefix + '.pth')}", logger=logger)
 
 def load_model(base_model, ckpt_path, logger = None):
+    """Load model weights from checkpoint.
+    
+    Args:
+        base_model: Model to load weights into
+        ckpt_path: Path to the checkpoint file
+        logger: Optional logger for printing information
+        
+    Raises:
+        NotImplementedError: If checkpoint file doesn't exist
+        RuntimeError: If checkpoint weights don't match model structure
+    """
     if not os.path.exists(ckpt_path):
         raise NotImplementedError('no checkpoint file from path %s...' % ckpt_path)
     print_log(f'Loading weights from {ckpt_path}...', logger = logger )
 
-    # load state dict
+    # Load state dict
     state_dict = torch.load(ckpt_path, map_location='cpu')
-    # parameter resume of base model
+    # Extract model weights from checkpoint
     if state_dict.get('model') is not None:
         base_ckpt = {k.replace("module.", ""): v for k, v in state_dict['model'].items()}
     elif state_dict.get('base_model') is not None:
