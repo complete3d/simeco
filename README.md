@@ -47,7 +47,7 @@ A CUDA-enabled GPU is required for local inference.
 3. Run the inference code and choose the desired transformation mode (e.g., `sim3`, `translation`, `scale` or `rotation`). The results will be saved in the `data/result` directory.
 
    ```bash
-   python inference.py --pc_file data/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy --aug_mode sim3
+   python inference.py evaluate.single_file_path="demo/demo_data/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy" evaluate.aug_mode="sim3" 
    ```
 ---
 
@@ -122,10 +122,33 @@ We use the official PCN dataset. Please download the dataset from [PCN](https://
 └──category.txt
 ```
 
+## ⚖️ Debiased Evaluation Protocol 
+
+To remove pose and scale bias, the centroid and scale are computed **only from the partial input** and applied to both partial and GT:
+
+```python
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+centroid = pc.mean(0, keepdims=True)
+scale = 1.0 / np.max(np.linalg.norm(pc - centroid, axis=1))
+R = Rotation.random().as_matrix()
+
+pc = ((pc - centroid) * scale) @ R.T
+gt = ((gt - centroid) * scale) @ R.T
+```
+
+For evaluation, we recover the original scale before computing metrics:
+
+```python
+pred = pred / scale
+gt   = gt   / scale
+```
+
 ## 🚧 TODOs
 
 - [x] Code release
-- [ ] Debiased protocol
+- [x] Debiased evaluation protocol
 - [ ] HF release
 
 ## 🎓 Citation
