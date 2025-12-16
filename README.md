@@ -122,6 +122,29 @@ We use the official PCN dataset. Please download the dataset from [PCN](https://
 └──category.txt
 ```
 
+## 🔍 Debiased Protocal 
+
+We apply a SIM(3) transformation to remove global pose and scale biases.
+The center and scale are computed from the partial input and applied consistently to both the partial point cloud and the ground truth.
+
+```python
+centroid = pc.mean(0, keepdims=True)
+scale = 1.0 / np.max(np.linalg.norm(pc - centroid, axis=1))
+R = Rotation.random().as_matrix()
+
+pc = ((pc - centroid) * scale) @ R.T
+gt = ((gt - centroid) * scale) @ R.T
+```
+
+During evaluation, predictions are rescaled back before computing metrics:
+
+```python
+pred, gt = pred / scale, gt / scale
+```
+
+All metrics (e.g., Chamfer Distance, F-score) are computed after scale recovery, ensuring a debiased evaluation that reflects only shape completion quality.
+
+
 ## 🚧 TODOs
 
 - [x] Code release
