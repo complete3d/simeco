@@ -47,7 +47,7 @@ A CUDA-enabled GPU is required for local inference.
 3. Run the inference code and choose the desired transformation mode (e.g., `sim3`, `translation`, `scale` or `rotation`). The results will be saved in the `data/result` directory.
 
    ```bash
-   python inference.py --pc_file data/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy --aug_mode sim3
+   python inference.py evaluate.single_file_path="demo/demo_data/pc/2a05d684eeb9c1cfae2ca9bb680dd18b.npy" evaluate.aug_mode="sim3" 
    ```
 ---
 
