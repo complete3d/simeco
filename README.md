@@ -148,7 +148,7 @@ All metrics (e.g., Chamfer Distance, F-score) are computed after scale recovery,
 ## 🚧 TODOs
 
 - [x] Code release
-- [ ] Debiased protocol
+- [x] Debiased protocol
 - [ ] HF release
 
 ## 🎓 Citation
