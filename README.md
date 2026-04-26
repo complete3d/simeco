@@ -149,7 +149,7 @@ gt   = gt   / scale
 
 - [x] Code release
 - [x] Debiased evaluation protocol
-- [ ] HF release
+- [x] HF release
 
 ## 🎓 Citation
 
