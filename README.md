@@ -4,7 +4,7 @@
 
 [![Website](https://img.shields.io/badge/%F0%9F%A4%8D%20Project%20-Website-blue)](https://sime-completion.github.io)
 [![arXiv](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/abs/2509.26631)
-[![Hugging Face Model](https://img.shields.io/badge/🤗%20Hugging%20Face%20-Model-yellow)](https://huggingface.co/)
+[![Hugging Face Model](https://img.shields.io/badge/🤗%20Hugging%20Face%20-Model-yellow)](https://huggingface.co/wang2e2f/simeco)
 [![Colab Demo](https://img.shields.io/badge/Colab-Demo-FF6F00?logo=googlecolab&logoColor=yellow)](https://colab.research.google.com/github/complete3d/simeco/blob/main/demo/demo.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://raw.githubusercontent.com/complete3d/simeco/main/LICENSE)
 
@@ -149,7 +149,7 @@ gt   = gt   / scale
 
 - [x] Code release
 - [x] Debiased evaluation protocol
-- [ ] HF release
+- [x] HF release
 
 ## 🎓 Citation
 
